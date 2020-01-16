@@ -244,7 +244,7 @@
                 </div>
             </div>
         </div>
-        <button type="button" onclick="processSearch('${pageCo ntext.request.contextPath}',1)" class="btn btn-primary">
+        <button type="button" onclick="processSearch('${pageContext.request.contextPath}',1)" class="btn btn-primary">
             Accept
         </button>
     </form>
