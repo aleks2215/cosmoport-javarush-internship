@@ -7,9 +7,11 @@ import com.space.model.ShipType;
 import com.space.service.ShipService;
 import com.space.service.ShipServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,31 +42,18 @@ public class RestShipController {
                                               @RequestParam(value = "maxCrewSize", required = false) Integer maxCrewSize,
                                               @RequestParam(value = "minRating", required = false) Double minRating,
                                               @RequestParam(value = "maxRating", required = false) Double maxRating,
-                                              @RequestParam(value = "order", required = false) ShipOrder order,
+                                              @RequestParam(value = "order", required = false, defaultValue = "ID") ShipOrder order,
                                               @RequestParam(value = "pageNumber", required = false, defaultValue = "0") Integer pageNumber,
                                               @RequestParam(value = "pageSize", required = false, defaultValue = "3") Integer pageSize) {
 
-//        pageNumber = pageNumber == null ? 1 : pageNumber;
-//        pageSize = pageSize == null ?
-//        System.out.println(planet);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
+////        return resultList.stream()
+////                .skip(pageNumber * pageSize)
+////                .limit(pageSize)
+////                .collect(Collectors.toList());
+//        Specification<Ship> specification = Specification.where()
 
-//        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
-
-        System.out.println(name);
-        System.out.println(planet);
-        List<Ship> resultList = shipService.getShipsList();
-//        return resultList.stream()
-//                .skip(pageNumber * pageSize)
-//                .limit(pageSize)
-//                .collect(Collectors.toList());
-        System.out.println(name);
-        System.out.println(planet);
-
-//        return new ResponseEntity<>(resultList.stream()
-//                .skip(0 * 3)
-//                .limit(3)
-//                .collect(Collectors.toList()), HttpStatus.OK);
-        return new ResponseEntity<>(shipService.getShipsList(), HttpStatus.OK);
+        return new ResponseEntity<>(shipService.getShipsList(pageable).getContent(), HttpStatus.OK);
     }
 
     @GetMapping("/ships/count")
@@ -81,8 +70,7 @@ public class RestShipController {
                                             @RequestParam(value = "minRating", required = false) Double minRating,
                                             @RequestParam(value = "maxRating", required = false) Double maxRating) {
 
-//        throw new NotFoundException();
-//        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+
         return new ResponseEntity<>(shipService.getShipsCount(), HttpStatus.OK);
     }
 
