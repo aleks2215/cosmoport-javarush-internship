@@ -77,24 +77,25 @@ public class RestShipController {
     @PostMapping("/ships")
     public ResponseEntity<Ship> createShip(@RequestBody Ship ship) {
         Ship responseShip;
-        try {
-            responseShip = shipService.createShip(ship);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+//        try {
+        responseShip = shipService.createShip(ship);
+//        } catch (BadRequestException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
         return new ResponseEntity<>(responseShip, HttpStatus.OK);
     }
 
     @GetMapping("/ships/{id}")
-    public ResponseEntity<Ship> getShipById(@PathVariable Long id) {
+    public ResponseEntity<Ship> getShipById(@PathVariable String id) {
         Ship responseShip;
-        try {
-            responseShip = this.shipService.getShip(id);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+//        try {
+        Long longId = shipService.checkId(id);
+        responseShip = shipService.getShip(longId);
+//        } catch (NotFoundException e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        } catch (BadRequestException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
         return new ResponseEntity<>(responseShip, HttpStatus.OK);
     }
 
@@ -102,25 +103,27 @@ public class RestShipController {
     public ResponseEntity<Ship> updateShip(@PathVariable Long id,
                                            @RequestBody Ship ship) {
         Ship responseShip;
-        try {
+//        try {
             responseShip = this.shipService.updateShip(id, ship);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+//        } catch (NotFoundException e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        } catch (BadRequestException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
         return new ResponseEntity<>(responseShip, HttpStatus.OK);
     }
 
     @DeleteMapping("/ships/{id}")
-    public ResponseEntity<?> deleteShip(@PathVariable Long id) {
-        try {
-            this.shipService.deleteShip(id);
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } catch (BadRequestException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<?> deleteShip(@PathVariable String id) {
+//        try {
+        Long longId = shipService.checkId(id);
+
+        shipService.deleteShip(longId);
+//        } catch (NotFoundException e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        } catch (BadRequestException e) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

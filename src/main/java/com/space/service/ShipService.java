@@ -12,8 +12,9 @@ public interface ShipService {
 
     Page<Ship> getShipsList(Pageable sortedBy);
     Integer getShipsCount();
-    Ship createShip(Ship ship) throws BadRequestException;
-    Ship getShip(Long id) throws NotFoundException, BadRequestException;
-    Ship updateShip(Long id, Ship ship) throws NotFoundException, BadRequestException;
-    void deleteShip(Long id) throws NotFoundException, BadRequestException;
+    Ship createShip(Ship ship);
+    Ship getShip(Long id);
+    Long checkId(String id);
+    Ship updateShip(Long id, Ship ship);
+    void deleteShip(Long id);
 }

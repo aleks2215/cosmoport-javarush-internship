@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -24,8 +26,7 @@ public class ShipServiceImpl implements ShipService {
     @Override
     public Page<Ship> getShipsList(Pageable sortedBy) {
         System.out.println("hi");
-//        shipRepository.findAll()
-//        shipRepository.f
+
         Page<Ship> shipList = shipRepository.findAll(sortedBy);
         for (Ship ship : shipList) {
             System.out.println(ship);
@@ -40,15 +41,21 @@ public class ShipServiceImpl implements ShipService {
     }
 
     @Override
-    public Ship createShip(Ship ship) throws BadRequestException {
-
+    public Ship createShip(Ship ship) {
         if (ship.getName() == null || ship.getPlanet() == null || ship.getShipType() == null || ship.getProdDate() == null
-        || ship.getSpeed() == null || ship.getCrewSize() == null) {
+                || ship.getSpeed() == null || ship.getCrewSize() == null) {
             throw new BadRequestException();
         }
-        System.out.println();
-//        shipRepository.save(ship)
-        return null;
+
+        checkShipParams(ship);
+
+        if (ship.getUsed() == null) {
+            ship.setUsed(false);
+        }
+
+        ship.setRating(computeRating(ship));
+
+        return shipRepository.save(ship);
     }
 
     private void checkShipParams(Ship ship) {
@@ -81,34 +88,56 @@ public class ShipServiceImpl implements ShipService {
         }
     }
 
+    private Double computeRating(Ship ship) {
+        double k = ship.getUsed() ? 0.5 : 1;
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(ship.getProdDate());
+        int prodYear = calendar.get(Calendar.YEAR);
+        BigDecimal rating = BigDecimal.valueOf((80 * ship.getSpeed() * k) / (3019 - prodYear + 1)).setScale(2, RoundingMode.HALF_UP);
+        return rating.doubleValue();
+    }
+
     @Override
-    public Ship getShip(Long id) throws NotFoundException, BadRequestException {
+    public Ship getShip(Long id) {
+        if (!shipRepository.existsById(id)) {
+            throw new NotFoundException();
+        }
+
         return shipRepository.findById(id).get();
     }
 
     @Override
-    public Ship updateShip(Long id, Ship ship) throws NotFoundException, BadRequestException {
+    public Long checkId(String id) {
+        Long longId = null;
+
+        if (id == null || id.equals("") || id.equals("0")) {
+            throw new BadRequestException();
+        }
+
+        try {
+            longId = Long.parseLong(id);
+        } catch (NumberFormatException e) {
+            throw new BadRequestException();
+        }
+
+        if (longId < 0) {
+            throw new BadRequestException();
+        }
+
+        return longId;
+    }
+
+    @Override
+    public Ship updateShip(Long id, Ship ship) {
         return null;
     }
 
     @Override
-    public void deleteShip(Long id) throws NotFoundException, BadRequestException {
+    public void deleteShip(Long id) {
+        if (!shipRepository.existsById(id)) {
+            throw new NotFoundException();
+        }
+
         shipRepository.deleteById(id);
     }
-
-    //    public void save(Ship ship) {
-//        shipRepository.save(ship);
-//    }
-//
-//    public List<Ship> listAll() {
-//        return (List<Ship>) shipRepository.findAll();
-//    }
-//
-//    public Ship get(Long id) {
-//        return shipRepository.findById(id).get();
-//    }
-//
-//    public void delete(Long id) {
-//        shipRepository.deleteById(id);
-//    }
 }
