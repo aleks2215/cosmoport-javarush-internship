@@ -1,13 +1,9 @@
 package com.space.controller;
 
-import com.space.exceptions.BadRequestException;
-import com.space.exceptions.NotFoundException;
 import com.space.model.Ship;
 import com.space.model.ShipType;
 import com.space.service.ShipService;
-import com.space.service.ShipServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/rest")
@@ -47,13 +42,17 @@ public class RestShipController {
                                               @RequestParam(value = "pageSize", required = false, defaultValue = "3") Integer pageSize) {
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(order.getFieldName()));
-////        return resultList.stream()
-////                .skip(pageNumber * pageSize)
-////                .limit(pageSize)
-////                .collect(Collectors.toList());
-//        Specification<Ship> specification = Specification.where()
+        
+        Specification<Ship> specification = Specification.where(shipService.selectByName(name)
+                .and(shipService.selectByPlanet(planet))
+                .and(shipService.selectByShipType(shipType))
+                .and(shipService.selectByProdDate(after, before))
+                .and(shipService.selectByUse(isUsed))
+                .and(shipService.selectBySpeed(minSpeed, maxSpeed))
+                .and(shipService.selectByCrewSize(minCrewSize, maxCrewSize))
+                .and(shipService.selectByRating(minRating, maxRating)));
 
-        return new ResponseEntity<>(shipService.getShipsList(pageable).getContent(), HttpStatus.OK);
+        return new ResponseEntity<>(shipService.getShipsList(specification, pageable).getContent(), HttpStatus.OK);
     }
 
     @GetMapping("/ships/count")
@@ -70,8 +69,16 @@ public class RestShipController {
                                             @RequestParam(value = "minRating", required = false) Double minRating,
                                             @RequestParam(value = "maxRating", required = false) Double maxRating) {
 
+        Specification<Ship> specification = Specification.where(shipService.selectByName(name)
+                .and(shipService.selectByPlanet(planet))
+                .and(shipService.selectByShipType(shipType))
+                .and(shipService.selectByProdDate(after, before))
+                .and(shipService.selectByUse(isUsed))
+                .and(shipService.selectBySpeed(minSpeed, maxSpeed))
+                .and(shipService.selectByCrewSize(minCrewSize, maxCrewSize))
+                .and(shipService.selectByRating(minRating, maxRating)));
 
-        return new ResponseEntity<>(shipService.getShipsCount(), HttpStatus.OK);
+        return new ResponseEntity<>(shipService.getShipsCount(specification), HttpStatus.OK);
     }
 
     @PostMapping("/ships")
@@ -100,11 +107,12 @@ public class RestShipController {
     }
 
     @PostMapping("/ships/{id}")
-    public ResponseEntity<Ship> updateShip(@PathVariable Long id,
+    public ResponseEntity<Ship> updateShip(@PathVariable String id,
                                            @RequestBody Ship ship) {
         Ship responseShip;
 //        try {
-            responseShip = this.shipService.updateShip(id, ship);
+        Long longId = shipService.checkId(id);
+        responseShip = this.shipService.updateShip(longId, ship);
 //        } catch (NotFoundException e) {
 //            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 //        } catch (BadRequestException e) {
